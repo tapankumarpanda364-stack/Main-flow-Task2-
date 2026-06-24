@@ -1,0 +1,31 @@
+{
+  "name": "portfolio-website",
+  "version": "1.0.0",
+  "description": "Responsive personal portfolio website with Node.js, Express.js, and MongoDB contact form backend.",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "preview": "node frontend/preview-server.js",
+    "install:all": "npm install",
+    "check": "node --check backend/server.js && node --check backend/routes/contactRoutes.js && node --check backend/models/Contact.js && node --check backend/config/db.js && node --check frontend/preview-server.js"
+  },
+  "keywords": [
+    "portfolio",
+    "nodejs",
+    "express",
+    "mongodb",
+    "frontend"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

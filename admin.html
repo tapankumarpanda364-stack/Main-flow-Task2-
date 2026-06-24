@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Messages Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 54px 0;
+    }
+
+    .admin-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .message-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .message-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 10px 30px rgba(24, 33, 38, 0.06);
+    }
+
+    .message-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .message-card p {
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    .message-card small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .danger {
+      min-height: 40px;
+      border: 1px solid #f2b8b5;
+      border-radius: 8px;
+      padding: 0 14px;
+      color: #b42318;
+      background: #fff2f1;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 620px) {
+      .admin-top,
+      .message-card header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="admin-shell">
+    <div class="admin-top">
+      <div>
+        <p class="eyebrow">Admin Dashboard</p>
+        <h1>Contact Messages</h1>
+      </div>
+      <a class="btn secondary" href="index.html">Back to Portfolio</a>
+    </div>
+    <div class="message-list" id="messageList">
+      <p>Loading messages...</p>
+    </div>
+  </main>
+
+  <script>
+    const messageList = document.querySelector("#messageList");
+
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[character]);
+
+    const formatDate = (value) => new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }).format(new Date(value));
+
+    async function loadMessages() {
+      try {
+        const response = await fetch("/api/messages");
+        const messages = await response.json();
+
+        if (!response.ok) {
+          throw new Error(messages.message || "Unable to load messages.");
+        }
+
+        if (!messages.length) {
+          messageList.innerHTML = "<p>No messages found.</p>";
+          return;
+        }
+
+        messageList.innerHTML = messages.map((message) => `
+          <article class="message-card">
+            <header>
+              <div>
+                <h3>${escapeHtml(message.subject)}</h3>
+                <small>${escapeHtml(message.name)} | ${escapeHtml(message.email)} | ${formatDate(message.createdAt)}</small>
+              </div>
+              <button class="danger" type="button" data-id="${message._id}">Delete</button>
+            </header>
+            <p>${escapeHtml(message.message)}</p>
+          </article>
+        `).join("");
+      } catch (error) {
+        messageList.innerHTML = `<p>${error.message}</p>`;
+      }
+    }
+
+    messageList.addEventListener("click", async (event) => {
+      if (!event.target.matches("[data-id]")) return;
+
+      const id = event.target.dataset.id;
+      await fetch(`/api/messages/${id}`, { method: "DELETE" });
+      loadMessages();
+    });
+
+    loadMessages();
+  </script>
+</body>
+</html>
